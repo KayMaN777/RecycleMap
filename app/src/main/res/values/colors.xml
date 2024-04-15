@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#008577</color>
+    <color name="colorPrimaryDark">#00574B</color>
+    <color name="colorAccent">#D81B60</color>
+    <color name="black">#000000</color>
+    <color name="colorNull">#fafafa</color>
+    <color name="colorBumaga">#4085F3</color>
+    <color name="colorPlastic">#ED671C</color>
+    <color name="colorSteklo">#227440</color>
+    <color name="colorMetall">#E83623</color>
+    <color name="colorTetraPak">#2CC0A5</color>
+    <color name="colorOdezhda">#EA4C99</color>
+    <color name="colorLampochki">#8F6EEF</color>
+    <color name="colorKryshechki">#DAA219</color>
+    <color name="colorBytovayaTechnika">#C06563</color>
+    <color name="colorBatarejki">#C8744E</color>
+    <color name="colorShiny">#6F4D41</color>
+    <color name="colorOpasnyeOthody">#242627</color>
+    <color name="colorInoe">#3EB8DE</color>
+</resources>
