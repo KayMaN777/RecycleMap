@@ -48,93 +48,39 @@ import java.io.InputStreamReader
 import java.nio.file.Files
 import java.nio.file.Paths
 import kotlin.math.abs
-
-const val eps = 1e-9
-const val ZOOM_BOUNDARY = 11.4f
-var zoomValue = 11.4f
-fun Less(a:Double, b:Double): Boolean{
-    return b - a > eps
-}
-fun More(a:Double, b:Double): Boolean {
-    return a - b > eps
-}
-fun Equal(a:Double, b:Double):Boolean {
-    return abs(a-b) < eps
-}
-var PaperSost:Int=0
-var filterConditionList = mutableListOf(0, 0, 0, 0, 0, 0,
-                                        0, 0, 0, 0, 0, 0, 0)
-val filterFractionsList = mutableListOf(R.id.filter_paper_button, R.id.filter_plastic_button,
-    R.id.filter_glass_button, R.id.filter_metall_button, R.id.filter_tetrapack_button,
-    R.id.filter_clothes_button, R.id.filter_lightbulbs_button, R.id.filter_caps_button,
-    R.id.filter_appliances_button, R.id.filter_battery_button, R.id.filter_tires_button,
-    R.id.filter_dangerous_button ,R.id.filter_other_button)
-
-val fractionsViewList = mutableListOf(
-    Pair(R.drawable.paper, Color.parseColor("#4085F3")), Pair(R.drawable.plastic, Color.parseColor("#ED671C")),
-    Pair(R.drawable.glass, Color.parseColor("#227440")), Pair(R.drawable.metall, Color.parseColor("#E83623")),
-    Pair(R.drawable.tetrapack, Color.parseColor("#2CC0A5")), Pair(R.drawable.clothes, Color.parseColor("#EA4C99")),
-    Pair(R.drawable.lightbulbs, Color.parseColor("#8F6EEF")), Pair(R.drawable.caps, Color.parseColor("#DAA219")),
-    Pair(R.drawable.appliances, Color.parseColor("#C06563")), Pair(R.drawable.battery, Color.parseColor("#C8744E")),
-    Pair(R.drawable.tires, Color.parseColor("#6F4D41")), Pair(R.drawable.dangerous, Color.parseColor("#242627")),
-    Pair(R.drawable.other, Color.parseColor("#3EB8DE")))
-
-var list = ArrayList<PlacemarkMapObject>()
-var fractionsNumsList = ArrayList<Int>()
+lateinit var reader:BufferedReader
+lateinit var csvParser:CSVParser
+private lateinit var checkLocationPermission: ActivityResultLauncher<Array<String>>
+private lateinit var userLocationLayer: UserLocationLayer
+private var routeStartLocation = Point(0.0, 0.0)
+private lateinit var mapView: MapView
+private var permissionLocation = false
+private var followUserLocation = false
+private lateinit var userLocationFab: FloatingActionButton
 class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraListener {
-
-    lateinit var reader:BufferedReader
-    lateinit var csvParser:CSVParser
-    private lateinit var checkLocationPermission: ActivityResultLauncher<Array<String>>
-    private lateinit var userLocationLayer: UserLocationLayer
-    private var routeStartLocation = Point(0.0, 0.0)
-    private lateinit var mapView: MapView
-    private var permissionLocation = false
-    private var followUserLocation = false
-    private lateinit var userLocationFab: FloatingActionButton
-
-    fun findBestMatch(csvParser: CSVParser, point:Point):Int{
-        var best_match:Int = -1
-        var res:Double = 1e5
-        for (item in csvParser) {
-            var pointId = item.get(0).toInt()
-            var lon = item.get(1).toDouble()
-            var lat = item.get(2).toDouble()
-            var dlt = abs(lat - point.latitude) + abs(lon - point.longitude)
-            Log.d("ZAD", dlt.toString())
-            if (Less(dlt, res)) {
-                res = dlt
-                best_match = pointId
-            }
-        }
-        return best_match
-    }
-
-    fun AddPlacemarks(csvParser: CSVParser) {
+    fun addPlacemarks(csvParser: CSVParser) {
         val imageProvider = ImageProvider.fromResource(this, R.drawable.rec32)
         for (item in csvParser) {
-            var pointId = item.get(0).toInt()
-            var lon = item.get(1).toDouble()
-            var lat = item.get(2).toDouble()
-            var fractionsMask = item.get(3).toInt()
+            val lon = item.get(1).toDouble()
+            val lat = item.get(2).toDouble()
+            val fractionsMask = item.get(3).toInt()
             val placemark = mapView.map.mapObjects.addPlacemark().apply {
                 geometry = Point(lat, lon)
                 setIcon(imageProvider)
             }
             list.add(placemark)
             fractionsNumsList.add(fractionsMask)
-            placemark.addTapListener(pupa)
-            Log.d("EXCEL", pointId.toString())
+            placemark.addTapListener(pointTapListener)
         }
     }
 
-    private var pupa = object : MapObjectTapListener {
+    private var pointTapListener = object : MapObjectTapListener {
         override fun onMapObjectTap(mapObject: MapObject, point: Point): Boolean{
             reader = BufferedReader(assets.open("database.csv").reader())
             csvParser = CSVParser.parse(reader, CSVFormat.DEFAULT)
-            var best_match = findBestMatch(csvParser, point)
+            var bestMatch = findBestMatch(csvParser, point)
 
-            val path = "reformed_data/${best_match}.json"
+            val path = "reformed_data/${bestMatch}.json"
             val jsonFile = assets.open(path)
             val jsonObject = ReadJsonFile(jsonFile)
 
@@ -158,7 +104,7 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        MapKitFactory.setApiKey("babcf83b-1ef6-4a6e-a7d9-d75097211bc8")
+        MapKitFactory.setApiKey(MAPS_TOKEN)
         MapKitFactory.initialize(this)
         setContentView(R.layout.activity_main)
         mapView = findViewById(R.id.map_view)
@@ -177,7 +123,7 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
         mapView.map.addCameraListener(this)
         reader = BufferedReader(assets.open("database.csv").reader())
         csvParser = CSVParser.parse(reader, CSVFormat.DEFAULT)
-        AddPlacemarks(csvParser)
+        addPlacemarks(csvParser)
         initMenuFab()
     }
 
@@ -275,7 +221,6 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
 
         userLocationView.pin.setIcon(ImageProvider.fromResource(this, R.drawable.user_arrow))
         userLocationView.arrow.setIcon(ImageProvider.fromResource(this, R.drawable.user_arrow))
-        //userLocationView.accuracyCircle.fillColor = Color.BLUE
     }
 
     override fun onObjectUpdated(p0: UserLocationView, p1: ObjectEvent) {}

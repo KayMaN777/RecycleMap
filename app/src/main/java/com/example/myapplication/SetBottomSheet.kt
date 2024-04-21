@@ -84,7 +84,6 @@ fun SetFractions(jsonObject: JSONObject, view: View) {
             var params:MarginLayoutParams = ll.layoutParams as MarginLayoutParams
             params.topMargin = 10
         }
-        //Log.d("XER", j.toString())
         val fractionImageView = view.findViewById<ImageView>(fractionsLayoutList[i].first)
         val fractionTextView = view.findViewById<TextView>(fractionsLayoutList[i].second)
 
@@ -101,9 +100,6 @@ fun SetFractions(jsonObject: JSONObject, view: View) {
         fractionTextView.text = fractionsTextList[j]
         fractionTextView.setBackgroundColor(fractionsViewList[j].second)
         fractionTextView.layoutParams.height = 60
-
-
-        //ll.margin
 
     }
 }
