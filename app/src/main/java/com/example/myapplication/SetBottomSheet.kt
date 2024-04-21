@@ -2,13 +2,15 @@ package com.example.myapplication
 
 import android.annotation.SuppressLint
 import android.graphics.Color
-import android.util.Log
 import android.view.View
-import android.widget.ImageButton
+import android.view.ViewGroup.MarginLayoutParams
 import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.LinearLayout.LayoutParams
 import android.widget.TextView
+import androidx.core.view.MarginLayoutParamsCompat
+import androidx.core.view.marginTop
 import org.json.JSONObject
-import org.w3c.dom.Text
 
 fun SetPointDescription(jsonObject: JSONObject, view:View) {
     val pointDescriptionText = jsonObject.get("pointDescription").toString()
@@ -50,25 +52,38 @@ val fractionsLayoutList = mutableListOf(
     Pair(R.id.Fraction11, R.id.FractionText11), Pair(R.id.Fraction12, R.id.FractionText12),
     Pair(R.id.Fraction13, R.id.FractionText13))
 
-val fractionsViewList = mutableListOf(
-    Pair(R.drawable.paper, Color.parseColor("#4085F3")), Pair(R.drawable.plastic, Color.parseColor("#ED671C")),
-    Pair(R.drawable.glass, Color.parseColor("#227440")), Pair(R.drawable.metall, Color.parseColor("#E83623")),
-    Pair(R.drawable.tetrapack, Color.parseColor("#2CC0A5")), Pair(R.drawable.clothes, Color.parseColor("#EA4C99")),
-    Pair(R.drawable.lightbulbs, Color.parseColor("#8F6EEF")), Pair(R.drawable.caps, Color.parseColor("#DAA219")),
-    Pair(R.drawable.appliances, Color.parseColor("#C06563")), Pair(R.drawable.battery, Color.parseColor("#C8744E")),
-    Pair(R.drawable.tires, Color.parseColor("#6F4D41")), Pair(R.drawable.dangerous, Color.parseColor("#242627")),
-    Pair(R.drawable.other, Color.parseColor("#3EB8DE")))
-
 val fractionsTextList = mutableListOf(
     "Бумага", "Пластик", "Стекло", "Металл", "Тетра-пак", "Одежда", "Лампочки",
     "Крышечки", "Техника", "Батарейки", "Шины", "Опасное", "Другое")
 
+val fractionsWeight = mutableListOf(60, 70, 60, 60, 90, 60, 80, 80, 70, 90, 40, 70, 60)
 @SuppressLint("ResourceAsColor")
 fun SetFractions(jsonObject: JSONObject, view: View) {
     val fractions = jsonObject.get("fractions").toString()
     val fractionsList = fractions.split(" ")
     for (i in fractionsList.indices) {
         val j = fractionsList[i].toInt()-1
+        if (i == 0) {
+            val ll = view.findViewById<LinearLayout>(R.id.fractions_layout1)
+            ll.layoutParams.height = LayoutParams.WRAP_CONTENT
+            var params:MarginLayoutParams = ll.layoutParams as MarginLayoutParams
+            params.topMargin = 10
+        } else if (i == 4) {
+            val ll = view.findViewById<LinearLayout>(R.id.fractions_layout2)
+            ll.layoutParams.height = LayoutParams.WRAP_CONTENT
+            var params:MarginLayoutParams = ll.layoutParams as MarginLayoutParams
+            params.topMargin = 10
+        } else if (i == 8) {
+            val ll = view.findViewById<LinearLayout>(R.id.fractions_layout3)
+            ll.layoutParams.height = LayoutParams.WRAP_CONTENT
+            var params:MarginLayoutParams = ll.layoutParams as MarginLayoutParams
+            params.topMargin = 10
+        } else if (i == 12) {
+            val ll = view.findViewById<LinearLayout>(R.id.fractions_layout4)
+            ll.layoutParams.height = LayoutParams.WRAP_CONTENT
+            var params:MarginLayoutParams = ll.layoutParams as MarginLayoutParams
+            params.topMargin = 10
+        }
         //Log.d("XER", j.toString())
         val fractionImageView = view.findViewById<ImageView>(fractionsLayoutList[i].first)
         val fractionTextView = view.findViewById<TextView>(fractionsLayoutList[i].second)
@@ -77,9 +92,19 @@ fun SetFractions(jsonObject: JSONObject, view: View) {
         fractionImageView.setBackgroundColor(fractionsViewList[j].second)
         fractionImageView.layoutParams.height = 60
 
+        val param = LayoutParams(
+            0,
+            LayoutParams.WRAP_CONTENT,
+            fractionsWeight[j].toFloat())
+        fractionTextView.setLayoutParams(param)
+
         fractionTextView.text = fractionsTextList[j]
         fractionTextView.setBackgroundColor(fractionsViewList[j].second)
         fractionTextView.layoutParams.height = 60
+
+
+        //ll.margin
+
     }
 }
 

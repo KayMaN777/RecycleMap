@@ -1,6 +1,7 @@
 package com.example.myapplication
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.PointF
@@ -8,6 +9,7 @@ import android.location.LocationListener
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -17,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.sidesheet.SideSheetDialog
 import com.google.gson.Gson
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKitFactory
@@ -58,12 +61,30 @@ fun More(a:Double, b:Double): Boolean {
 fun Equal(a:Double, b:Double):Boolean {
     return abs(a-b) < eps
 }
+var PaperSost:Int=0
+var filterConditionList = mutableListOf(0, 0, 0, 0, 0, 0,
+                                        0, 0, 0, 0, 0, 0, 0)
+val filterFractionsList = mutableListOf(R.id.filter_paper_button, R.id.filter_plastic_button,
+    R.id.filter_glass_button, R.id.filter_metall_button, R.id.filter_tetrapack_button,
+    R.id.filter_clothes_button, R.id.filter_lightbulbs_button, R.id.filter_caps_button,
+    R.id.filter_appliances_button, R.id.filter_battery_button, R.id.filter_tires_button,
+    R.id.filter_dangerous_button ,R.id.filter_other_button)
 
+val fractionsViewList = mutableListOf(
+    Pair(R.drawable.paper, Color.parseColor("#4085F3")), Pair(R.drawable.plastic, Color.parseColor("#ED671C")),
+    Pair(R.drawable.glass, Color.parseColor("#227440")), Pair(R.drawable.metall, Color.parseColor("#E83623")),
+    Pair(R.drawable.tetrapack, Color.parseColor("#2CC0A5")), Pair(R.drawable.clothes, Color.parseColor("#EA4C99")),
+    Pair(R.drawable.lightbulbs, Color.parseColor("#8F6EEF")), Pair(R.drawable.caps, Color.parseColor("#DAA219")),
+    Pair(R.drawable.appliances, Color.parseColor("#C06563")), Pair(R.drawable.battery, Color.parseColor("#C8744E")),
+    Pair(R.drawable.tires, Color.parseColor("#6F4D41")), Pair(R.drawable.dangerous, Color.parseColor("#242627")),
+    Pair(R.drawable.other, Color.parseColor("#3EB8DE")))
+
+var list = ArrayList<PlacemarkMapObject>()
+var fractionsNumsList = ArrayList<Int>()
 class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraListener {
 
     lateinit var reader:BufferedReader
     lateinit var csvParser:CSVParser
-    var list = ArrayList<PlacemarkMapObject>()
     private lateinit var checkLocationPermission: ActivityResultLauncher<Array<String>>
     private lateinit var userLocationLayer: UserLocationLayer
     private var routeStartLocation = Point(0.0, 0.0)
@@ -95,11 +116,13 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
             var pointId = item.get(0).toInt()
             var lon = item.get(1).toDouble()
             var lat = item.get(2).toDouble()
+            var fractionsMask = item.get(3).toInt()
             val placemark = mapView.map.mapObjects.addPlacemark().apply {
                 geometry = Point(lat, lon)
                 setIcon(imageProvider)
             }
             list.add(placemark)
+            fractionsNumsList.add(fractionsMask)
             placemark.addTapListener(pupa)
             Log.d("EXCEL", pointId.toString())
         }
@@ -122,6 +145,16 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
             dialog.show()
             return true
         }}
+    fun initMenuFab() {
+        val menuFab = findViewById<FloatingActionButton>(R.id.menu_fab)
+        menuFab.setOnClickListener{
+            val dialog = SideSheetDialog(this@MainActivity)
+            val view = layoutInflater.inflate(R.layout.side_sheet_dialog, null)
+            dialog.setContentView(view)
+            dialog.show()
+            initFractionsButtons(view, dialog)
+        }
+    }
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -145,6 +178,7 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
         reader = BufferedReader(assets.open("database.csv").reader())
         csvParser = CSVParser.parse(reader, CSVFormat.DEFAULT)
         AddPlacemarks(csvParser)
+        initMenuFab()
     }
 
     private fun checkPermission() {

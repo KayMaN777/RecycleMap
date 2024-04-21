@@ -5,6 +5,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|start"
+        android:id="@+id/menu_fab"
+        android:layout_margin="7dp"
+        android:src="@drawable/menu_icon">
+    </com.google.android.material.floatingactionbutton.FloatingActionButton>
 
     <com.yandex.mapkit.mapview.MapView
         android:id="@+id/map_view"
