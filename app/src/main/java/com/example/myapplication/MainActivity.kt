@@ -79,6 +79,22 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
             placemark.addTapListener(pointTapListener)
         }
     }
+    fun startFromJson(jsonObject: JSONObject) {
+        val imageProvider = ImageProvider.fromResource(this, R.drawable.rec32)
+        for (i in 0..15999) {
+            val data = jsonObject.get(i.toString()).toString().split(' ')
+            val lon = data[5].toDouble()
+            val lat = data[3].toDouble()
+            val fractionsMask = data[7].toInt()
+            val placemark = mapView.map.mapObjects.addPlacemark().apply {
+                geometry = Point(lat, lon)
+                setIcon(imageProvider)
+            }
+            list.add(placemark)
+            fractionsNumsList.add(fractionsMask)
+            placemark.addTapListener(pointTapListener)
+        }
+    }
 
     fun setGoogleMapsClickListener(jsonObject: JSONObject, view: View) {
         val button = view.findViewById<ImageButton>(R.id.open_google)
@@ -164,7 +180,19 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
         mapView.map.addCameraListener(this)
         reader = BufferedReader(assets.open("database.csv").reader())
         csvParser = CSVParser.parse(reader, CSVFormat.DEFAULT)
-        addPlacemarks(csvParser)
+        val queue = Volley.newRequestQueue(this@MainActivity)
+        val request = StringRequest(
+            Request.Method.GET,
+            DATABASE_URL,
+            {
+                    result -> startFromJson(ReadJsonFile(result)); Log.d("POLYCHKA", result)
+            },
+            {
+                    error -> addPlacemarks(csvParser); Log.d("POLYCHKA", "$error")
+            }
+        )
+        queue.add(request)
+        //addPlacemarks(csvParser)
         initMenuFab()
     }
 
