@@ -2,13 +2,16 @@ package com.example.myapplication
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.PointF
 import android.location.LocationListener
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
@@ -17,6 +20,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.android.volley.Request
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.sidesheet.SideSheetDialog
@@ -74,21 +80,56 @@ class MainActivity : AppCompatActivity(), UserLocationObjectListener, CameraList
         }
     }
 
+    fun setGoogleMapsClickListener(jsonObject: JSONObject, view: View) {
+        val button = view.findViewById<ImageButton>(R.id.open_google)
+        val lon = jsonObject.get("lon").toString()
+        val lat = jsonObject.get("lat").toString()
+        button.setOnClickListener {
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.setData(Uri.parse("google.navigation:q=${lon}, ${lat}&mode=w"))
+            intent.setPackage("com.google.android.apps.maps")
+            startActivity(intent)
+        }
+    }
+    fun setYandexMapsClickListener(jsonObject: JSONObject, view: View) {
+        val button = view.findViewById<ImageButton>(R.id.open_yandex)
+        val lon = jsonObject.get("lon").toString()
+        val lat = jsonObject.get("lat").toString()
+        button.setOnClickListener {
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.setData(Uri.parse("yandexmaps://build_route_on_map?lat_to=${lon}&lon_to=${lat}"))
+            intent.setPackage("ru.yandex.yandexmaps")
+            startActivity(intent)
+        }
+    }
+    fun StartBottomSheetDialog(jsonObject:JSONObject) {
+        val dialog = BottomSheetDialog(this@MainActivity)
+        val view = layoutInflater.inflate(R.layout.bottom_sheet_dialog, null)
+        SetBottomSheet(jsonObject, view)
+        setGoogleMapsClickListener(jsonObject, view)
+        setYandexMapsClickListener(jsonObject, view)
+        dialog.setContentView(view)
+        dialog.show()
+    }
+
     private var pointTapListener = object : MapObjectTapListener {
         override fun onMapObjectTap(mapObject: MapObject, point: Point): Boolean{
             reader = BufferedReader(assets.open("database.csv").reader())
             csvParser = CSVParser.parse(reader, CSVFormat.DEFAULT)
             var bestMatch = findBestMatch(csvParser, point)
 
-            val path = "reformed_data/${bestMatch}.json"
-            val jsonFile = assets.open(path)
-            val jsonObject = ReadJsonFile(jsonFile)
-
-            val dialog = BottomSheetDialog(this@MainActivity)
-            val view = layoutInflater.inflate(R.layout.bottom_sheet_dialog, null)
-            SetBottomSheet(jsonObject, view)
-            dialog.setContentView(view)
-            dialog.show()
+            val queue = Volley.newRequestQueue(this@MainActivity)
+            val request = StringRequest(
+                Request.Method.GET,
+                "${POINT_URL}/${bestMatch}",
+                {
+                    result -> StartBottomSheetDialog(ReadJsonFile(result)); Log.d("POLYCHKA", result)
+                },
+                {
+                    error -> StartBottomSheetDialog(ReadJsonFile(assets.open("reformed_data/${bestMatch}.json"))); Log.d("POLYCHKA", "$error")
+                }
+            )
+            queue.add(request)
             return true
         }}
     fun initMenuFab() {

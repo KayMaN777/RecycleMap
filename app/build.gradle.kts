@@ -52,4 +52,5 @@ dependencies {
     implementation("com.yandex.android:maps.mobile:4.4.0-lite")
     implementation("org.apache.commons:commons-csv:1.5")
     implementation("com.google.code.gson:gson:2.8.5")
+    implementation("com.android.volley:volley:1.2.1")
 }

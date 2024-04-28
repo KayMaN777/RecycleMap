@@ -365,6 +365,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="30"
                 android:background="@color/colorNull"
+                android:id="@+id/open_google"
                 android:src="@drawable/google_maps">
             </ImageButton>
             <ImageButton
@@ -372,6 +373,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="30"
                 android:background="@color/colorNull"
+                android:id="@+id/open_yandex"
                 android:src="@drawable/geo_pointer">
             </ImageButton>
         </LinearLayout>

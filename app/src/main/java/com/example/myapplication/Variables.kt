@@ -29,3 +29,5 @@ val fractionsViewList = mutableListOf(
 var list = ArrayList<PlacemarkMapObject>()
 var fractionsNumsList = ArrayList<Int>()
 val MAPS_TOKEN = "babcf83b-1ef6-4a6e-a7d9-d75097211bc8"
+val DATABASE_URL = "http://194.87.92.55:5801/database"
+val POINT_URL = "http://194.87.92.55:5801/points"

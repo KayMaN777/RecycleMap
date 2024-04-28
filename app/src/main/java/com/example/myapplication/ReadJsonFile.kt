@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import android.util.Log
 import com.yandex.mapkit.geometry.Point
 import org.apache.commons.csv.CSVParser
 import org.json.JSONObject
@@ -17,8 +18,13 @@ fun ReadJsonFile(jsonFile:InputStream):JSONObject {
         }
     }
     val jsonString = stringBuilder.toString()
+    Log.d("POLYCHKA", jsonString)
     val jsonObject = JSONObject(jsonString)
     return jsonObject
+}
+
+fun ReadJsonFile(jsonFile: String):JSONObject {
+    return JSONObject(jsonFile.substring(jsonFile.indexOf("{"), jsonFile.lastIndexOf("}") + 1));
 }
 fun findBestMatch(csvParser: CSVParser, point:Point):Int{
     var best_match:Int = -1

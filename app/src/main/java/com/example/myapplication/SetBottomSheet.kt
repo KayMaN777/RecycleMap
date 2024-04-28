@@ -1,15 +1,16 @@
 package com.example.myapplication
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.view.View
 import android.view.ViewGroup.MarginLayoutParams
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.LinearLayout.LayoutParams
 import android.widget.TextView
-import androidx.core.view.MarginLayoutParamsCompat
-import androidx.core.view.marginTop
 import org.json.JSONObject
 
 fun SetPointDescription(jsonObject: JSONObject, view:View) {
